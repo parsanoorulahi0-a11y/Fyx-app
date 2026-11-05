@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fyx – Log in or create an account</title>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --sky1:#2c3839;--sky2:#839391;--far:#5d6d70;--snow:#e3eae8;--mid:#3b4a4a;--near:#1f2c2b;--tree:#0f1a18;--fog:#b9c6c3;
+  --glass:rgba(16,24,22,.46);--edge:rgba(255,255,255,.24);--tx:#f4f6f5;--mu:#b6c2be;
+  --field:rgba(255,255,255,.08);--fedge:rgba(255,255,255,.3);--btn:#fff;--btnx:#14201c;--ac:#ffa25e;--err:#ffb9ad;--ok:#a8e6c1;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+:root{--sky2:#839391}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    color-scheme:light;
+    --sky1:#cfdcdc;--sky2:#f3ede2;--far:#a5b5b9;--snow:#fff;--mid:#86988f;--near:#58705f;--tree:#2c4238;--fog:#fff;
+    --glass:rgba(255,255,255,.52);--edge:rgba(255,255,255,.85);--tx:#14201c;--mu:#41534d;
+    --field:rgba(255,255,255,.6);--fedge:rgba(20,32,28,.3);--btn:#14201c;--btnx:#fff;--ac:#b83c05;--err:#a21d0a;--ok:#14663a
+  }
+}
+:root[data-theme="dark"]{color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font:400 15px/1.5 "Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--tx);background:var(--sky1)}
+.scene{position:fixed;inset:0;z-index:0}
+.scene svg{width:100%;height:100%;display:block}
+.wrap{position:relative;z-index:1;min-height:100%;display:grid;place-items:center;padding:24px 16px}
+.card{width:100%;max-width:400px;padding:32px 28px 26px;border-radius:22px;background:var(--glass);border:1px solid var(--edge);
+  -webkit-backdrop-filter:blur(18px) saturate(1.1);backdrop-filter:blur(18px) saturate(1.1);box-shadow:0 24px 60px rgba(0,0,0,.28)}
+.brand{display:flex;align-items:center;gap:10px;margin:0 0 22px;font-weight:700;font-size:17px;letter-spacing:.2px}
+.mark{width:30px;height:30px;border-radius:10px;background:var(--btn);color:var(--btnx);display:grid;place-items:center;font-size:16px;font-weight:700}
+h1{margin:0 0 4px;font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-.3px}
+.sub{margin:0 0 22px;color:var(--mu)}
+form{display:grid;gap:14px}
+form[hidden]{display:none}
+.f label{display:block;margin:0 0 6px 4px;font-size:13px;font-weight:500;color:var(--mu)}
+.in{position:relative}
+.in input{width:100%;height:48px;padding:0 18px;border-radius:999px;border:1px solid var(--fedge);background:var(--field);color:var(--tx);font:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+.in input::placeholder{color:var(--mu);opacity:.75}
+.in input:focus-visible{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 35%,transparent)}
+.in input[aria-invalid="true"]{border-color:var(--err)}
+.in.pw input{padding-right:48px}
+.at{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--mu);pointer-events:none}
+.in.id input{padding-left:36px}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:50%;background:none;color:var(--mu);display:grid;place-items:center;cursor:pointer}
+.eye:hover{color:var(--tx)}
+.eye:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.eye svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.eye .off{display:none}.eye[aria-pressed="true"] .on{display:none}.eye[aria-pressed="true"] .off{display:block}
+.err{min-height:0;margin:5px 0 0 4px;font-size:12.5px;color:var(--err)}
+.err:empty{display:none}
+.go{height:48px;margin-top:6px;border:0;border-radius:999px;background:var(--btn);color:var(--btnx);font:inherit;font-weight:700;cursor:pointer;transition:transform .12s,opacity .15s}
+.go:active{transform:scale(.98)}
+.go:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+.go[aria-busy="true"]{opacity:.6;cursor:progress}
+.status{margin:0;min-height:20px;text-align:center;font-size:13.5px;color:var(--ok)}
+.status.bad{color:var(--err)}
+.switch{margin:18px 0 0;text-align:center;color:var(--mu)}
+.switch a{color:var(--tx);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.switch a:focus-visible{outline:2px solid var(--ac);outline-offset:3px;border-radius:4px}
+.pane{animation:in .22s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.pane{animation:none}.go,.in input{transition:none}}
+@media (max-width:420px){.card{padding:26px 20px 22px;border-radius:20px}h1{font-size:25px}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.card{background:color-mix(in srgb,var(--sky1) 88%,transparent)}}
+</style>
+</head>
+<body>
+<div class="scene" aria-hidden="true">
+<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--sky1)"/><stop offset="1" stop-color="var(--sky2)"/></linearGradient>
+  <linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--fog)" stop-opacity="0"/><stop offset=".55" stop-color="var(--fog)" stop-opacity=".5"/><stop offset="1" stop-color="var(--fog)" stop-opacity="0"/></linearGradient>
+  <symbol id="pine" viewBox="0 0 40 100"><polygon points="20,0 31,30 25,30 35,58 27,58 40,90 22,90 22,100 18,100 18,90 0,90 13,58 5,58 15,30 9,30"/></symbol>
+</defs>
+<rect width="1600" height="900" fill="url(#sky)"/>
+<path fill="var(--far)" d="M0 520 L160 390 L260 450 L430 240 L570 400 L700 330 L860 470 L1030 290 L1190 430 L1330 340 L1490 460 L1600 400 V900 H0Z"/>
+<g fill="var(--snow)" opacity=".92"><path d="M430 240 L372 330 L402 322 L430 348 L456 320 L488 334Z"/><path d="M1030 290 L970 380 L1002 372 L1030 398 L1058 370 L1090 384Z"/><path d="M700 330 L664 392 L690 386 L706 404 L726 384 L748 394Z"/><path d="M160 390 L128 440 L150 436 L166 450 L184 434 L200 444Z"/></g>
+<path fill="var(--mid)" d="M0 650 L180 570 L340 630 L520 550 L700 640 L900 570 L1100 650 L1300 580 L1600 660 V900 H0Z"/>
+<rect y="540" width="1600" height="190" fill="url(#fog)"/>
+<path fill="var(--near)" d="M0 770 Q300 690 600 750 T1200 730 T1600 770 V900 H0Z"/>
+<g id="trees" fill="var(--tree)"></g>
+</svg>
+</div>
+
+<main class="wrap">
+<section class="card" aria-labelledby="ttl">
+  <p class="brand"><span class="mark" aria-hidden="true">F</span>Fyx</p>
+  <h1 id="ttl">Log in</h1>
+  <p class="sub" id="sub">Pick up your chats where you left them.</p>
+
+  <form id="login" class="pane" novalidate data-kind="login">
+    <div class="f"><label for="l-id">User ID</label>
+      <div class="in id"><span class="at" aria-hidden="true">@</span><input id="l-id" name="id" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="your_user_id" aria-describedby="l-id-e"></div>
+      <p class="err" id="l-id-e"></p></div>
+    <div class="f"><label for="l-pw">Password</label>
+      <div class="in pw"><input id="l-pw" name="pw" type="password" autocomplete="current-password" placeholder="Your password" aria-describedby="l-pw-e">
+        <button type="button" class="eye" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" class="on"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg viewBox="0 0 24 24" class="off"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7c1.5 0 2.8-.3 4-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+      <p class="err" id="l-pw-e"></p></div>
+    <button class="go" type="submit">Login</button>
+    <p class="status" role="status" aria-live="polite"></p>
+  </form>
+
+  <form id="register" class="pane" novalidate hidden data-kind="register">
+    <div class="f"><label for="r-name">Display name</label>
+      <div class="in"><input id="r-name" name="name" type="text" autocomplete="name" placeholder="How friends see you" aria-describedby="r-name-e"></div>
+      <p class="err" id="r-name-e"></p></div>
+    <div class="f"><label for="r-id">User ID</label>
+      <div class="in id"><span class="at" aria-hidden="true">@</span><input id="r-id" name="id" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="your_user_id" aria-describedby="r-id-e"></div>
+      <p class="err" id="r-id-e"></p></div>
+    <div class="f"><label for="r-pw">Password</label>
+      <div class="in pw"><input id="r-pw" name="pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" aria-describedby="r-pw-e">
+        <button type="button" class="eye" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" class="on"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg viewBox="0 0 24 24" class="off"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7c1.5 0 2.8-.3 4-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+      <p class="err" id="r-pw-e"></p></div>
+    <div class="f"><label for="r-pw2">Confirm password</label>
+      <div class="in pw"><input id="r-pw2" name="pw2" type="password" autocomplete="new-password" placeholder="Type it again" aria-describedby="r-pw2-e">
+        <button type="button" class="eye" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" class="on"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><svg viewBox="0 0 24 24" class="off"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7c1.5 0 2.8-.3 4-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button></div>
+      <p class="err" id="r-pw2-e"></p></div>
+    <button class="go" type="submit">Create account</button>
+    <p class="status" role="status" aria-live="polite"></p>
+  </form>
+
+  <p class="switch" id="sw"></p>
+</section>
+</main>
+
+<script>
+(function(){
+  /* background pines: deterministic, so the scene never shifts between loads */
+  var g=document.getElementById('trees'),s=7,r=function(){s=(s*9301+49297)%233280;return s/233280},ns='http://www.w3.org/2000/svg';
+  function pine(x,y,h){var u=document.createElementNS(ns,'use');u.setAttribute('href','#pine');u.setAttribute('x',x);u.setAttribute('y',y);u.setAttribute('width',h*.4);u.setAttribute('height',h);g.appendChild(u)}
+  for(var i=0;i<26;i++){var h=40+r()*50;pine(i*64+r()*30-20,745-h*.8+r()*30,h)}
+  [[-30,250,560],[120,380,420],[330,470,330],[1330,330,520],[1470,420,430],[1210,500,300]].forEach(function(t){pine(t[0],t[1],t[2])});
+
+  var RULES={
+    name:function(v){return v.trim()?'':'Enter the name people will see.'},
+    id:function(v,k){if(k==='login')return v.trim()?'':'Enter your User ID.';return /^[A-Za-z][A-Za-z0-9_]{4,23}$/.test(v.trim())?'':'Use 5–24 letters, numbers or _, starting with a letter.'},
+    pw:function(v,k){if(k==='login')return v?'':'Enter your password.';return v.length>=8?'':'Use at least 8 characters.'},
+    pw2:function(v,k,f){return v&&v===f.pw.value?'':'Passwords don’t match.'}
+  };
+  function check(inp,kind,form,show){
+    var m=RULES[inp.name](inp.value,kind,form),e=document.getElementById(inp.id+'-e');
+    if(show){e.textContent=m;inp.setAttribute('aria-invalid',m?'true':'false')}
+    return !m;
+  }
+
+  var forms={login:document.getElementById('login'),register:document.getElementById('register')};
+  var COPY={
+    login:{t:'Log in',s:'Pick up your chats where you left them.',w:'New to Fyx? <a href="#register">Create an account</a>'},
+    register:{t:'Create account',s:'Choose a User ID friends can find you by.',w:'Already have an account? <a href="#login">Log in</a>'}
+  };
+  function show(v){
+    var c=COPY[v];
+    Object.keys(forms).forEach(function(k){forms[k].hidden=k!==v});
+    document.getElementById('ttl').textContent=c.t;
+    document.getElementById('sub').textContent=c.s;
+    document.getElementById('sw').innerHTML=c.w;
+    document.title='Fyx – '+c.t;
+    var f=forms[v];if(f.dataset.ready!=='1'){f.dataset.ready='1'}
+    f.classList.remove('pane');void f.offsetWidth;f.classList.add('pane');
+  }
+  function route(){show(location.hash==='#register'?'register':'login')}
+  addEventListener('hashchange',route);route();
+
+  Object.keys(forms).forEach(function(k){
+    var f=forms[k];
+    f.querySelectorAll('input').forEach(function(i){
+      i.addEventListener('blur',function(){if(i.value||i.getAttribute('aria-invalid'))check(i,k,f,true)});
+      i.addEventListener('input',function(){if(i.getAttribute('aria-invalid')==='true')check(i,k,f,true);if(k==='register'&&i.name==='pw'&&f.pw2.value)check(f.pw2,k,f,true)});
+    });
+    f.querySelectorAll('.eye').forEach(function(b){
+      b.addEventListener('click',function(){
+        var inp=b.parentNode.querySelector('input'),on=inp.type==='password';
+        inp.type=on?'text':'password';b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',on?'Hide password':'Show password');
+      });
+    });
+    f.addEventListener('submit',function(ev){
+      ev.preventDefault();
+      var bad=null,st=f.querySelector('.status'),btn=f.querySelector('.go');
+      st.textContent='';st.className='status';
+      f.querySelectorAll('input').forEach(function(i){if(!check(i,k,f,true)&&!bad)bad=i});
+      if(bad)return bad.focus();
+      var q=function(n){return f.querySelector('[name="'+n+'"]')};
+      var data={id:q('id').value.trim(),pw:q('pw').value};if(k==='register')data.name=q('name').value.trim();
+      btn.setAttribute('aria-busy','true');btn.disabled=true;
+      submitToServer(k,data).then(function(){
+        st.textContent=k==='login'?'Logged in as @'+data.id+'.':'Account created for @'+data.id+'.';
+      }).catch(function(err){
+        st.className='status bad';st.textContent=err.message;
+      }).then(function(){btn.removeAttribute('aria-busy');btn.disabled=false});
+    });
+  });
+
+  var ERR={creds:'User ID or password is incorrect.',taken:'That User ID is already taken.',locked:'Too many attempts. Try again in a few minutes.',rate:'Too many requests. Wait a moment and try again.',invalid:'Check your details and try again.'};
+  function submitToServer(kind,data){
+    var body={uname:data.id,pw:data.pw};if(data.name)body.name=data.name;
+    return fetch('/api/'+kind,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .catch(function(){throw new Error('Couldn’t reach the server. Check your connection and try again.')})
+      .then(function(r){return r.json().catch(function(){return {}}).then(function(j){
+        if(!r.ok)throw new Error(ERR[j.e]||'Something went wrong on the server.');
+        return j;
+      })});
+  }
+})();
+</script>
+</body>
+</html>

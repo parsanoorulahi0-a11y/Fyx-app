@@ -1,0 +1,13 @@
+{
+  "name": "fyx-auth",
+  "version": "1.0.0",
+  "description": "Fyx login and registration server",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
